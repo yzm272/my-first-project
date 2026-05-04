@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AJAX Request Example</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+<h1>李国纪的学习小屋</h1>
+<input type="text" id="messageInput" placeholder="请输入消息...">
+<button id="sendButton">知识问答机器人</button>
+
+<div id="result"></div>
+
+<script>
+    $(document).ready(function() {
+
+        $('#sendButton').click(function() {
+            var msg = $('#messageInput').val();
+            console.log(msg);
+            $.ajax({
+               url: 'http://localhost:8081/hello/streamchat',
+               type: 'GET',
+               contentType: 'application/x-www-form-urlencoded',
+               data: { id: 1, msg:msg },
+               success: function(data) {
+                console.log(119);
+                    console.log(data);
+                    $ ('#result').text(JSON.stringify(data, null, 2));
+               },
+
+           });
+
+<!--            $.ajax({-->
+<!--                url: 'localhost:8081/hello/streamchat',-->
+<!--                method: 'GET',-->
+<!--                { msg: msg },-->
+<!--                success: function(response) {-->
+<!--                    $('#result').text('服务器响应: ' + response);-->
+<!--                },-->
+<!--                error: function(xhr, status, error) {-->
+<!--                    $('#result').text('发生错误: ' + error);-->
+<!--                }-->
+<!--            });-->
+        });
+    });
+</script>
+</body>
+</html>

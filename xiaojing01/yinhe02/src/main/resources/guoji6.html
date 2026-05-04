@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Umbrella Corp - AI Bio-Agent</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* === 基础重置与生化危机背景 === */
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-family: 'Courier New', monospace;
+        }
+
+<!--        body {-->
+<!--          /* 深红黑色调背景，模拟生化危机的压抑感 */-->
+<!--          background: #000 url('9f1dd8523b81d68f37a0644b9d8e36cd.jpeg') no-repeat center center;-->
+<!--          background-size: cover;-->
+<!--          color: #0f0; /* 荧光绿文字 */-->
+<!--          height: 100vh;-->
+<!--          display: flex;-->
+<!--          flex-direction: column;-->
+<!--          overflow: hidden;-->
+<!--          /* 添加噪点层，增加老旧感 */-->
+<!--          position: relative;-->
+<!--        }-->
+
+<!--        /* 叠加一层红色遮罩，营造紧张氛围 */-->
+<!--        body::before {-->
+<!--          content: '';-->
+<!--          position: absolute;-->
+<!--          top: 0; left: 0; right: 0; bottom: 0;-->
+<!--          background: rgba(139, 0, 0, 0.3); /* 暗红色叠加 */-->
+<!--          z-index: -1;-->
+<!--        }-->
+
+        /* === 顶部状态栏 === */
+        .header {
+          padding: 0.5rem 1rem;
+          text-align: center;
+          border-bottom: 2px solid #0f0;
+          background: rgba(0, 0, 0, 0.5);
+          box-shadow: 0 0 10px #0f0;
+        }
+        .header h1 {
+          font-size: 1.5rem;
+          letter-spacing: 3px;
+          text-shadow: 0 0 10px #0f0;
+          font-weight: bold;
+        }
+        .status {
+          font-size: 0.8rem;
+          color: #ff0;
+        }
+
+        /* === 聊天容器与扫描线效果 (核心科技感) === */
+        .chat-container {
+          flex: 1;
+          padding: 1rem;
+          overflow-y: auto;
+          max-height: 70vh;
+          /* 添加扫描线效果，模拟监控画面 */
+          background: repeating-linear-gradient(
+            0deg,
+            rgba(0, 0, 0, 0.2),
+            rgba(0, 0, 0, 0.2) 1px,
+            transparent 1px,
+            transparent 2px
+          );
+          border: 1px solid #0f0;
+        }
+
+        .chat-box {
+          background: rgba(0, 0, 0, 0.5);
+          border-radius: 5px;
+          padding: 1rem;
+          min-height: 100%;
+          overflow-y: auto;
+        }
+
+        /* === 消息样式 === */
+        .message {
+          margin-bottom: 1rem;
+          padding: 0.8rem 1rem;
+          border-radius: 5px;
+          max-width: 85%;
+          position: relative;
+          overflow: hidden;
+        }
+
+        /* 用户消息：右对齐，亮绿色背景 */
+        .user-message {
+          background: rgba(0, 255, 0, 0.2);
+          color: #0f0;
+          margin-left: auto;
+          border: 1px solid #0f0;
+          text-align: right;
+        }
+
+        /* AI消息：左对齐，带病毒图标 */
+        .agent-message {
+          background: rgba(0, 0, 0, 0.7);
+          color: #0f0;
+          border: 1px solid #0f0;
+          margin-right: auto;
+          position: relative;
+        }
+
+        /* 病毒/生物危害图标 */
+        .agent-icon {
+          display: inline-block;
+          width: 12px;
+          height: 12px;
+          background: #f00;
+          border-radius: 50%;
+          margin-right: 8px;
+          box-shadow: 0 0 5px #f00;
+        }
+
+        /* === 加载动画 (AI思考中) === */
+        @keyframes pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(0.95); }
+        }
+        .loading {
+          display: flex;
+          align-items: center;
+          color: #0f0;
+          font-style: italic;
+        }
+        .loading::after {
+          content: '...';
+          margin-left: 5px;
+          animation: dots 1.5s infinite;
+        }
+        @keyframes dots {
+          0%, 20% { content: '.'; }
+          40% { content: '..'; }
+          60%, 100% { content: '...'; }
+        }
+
+        /* === 输入区域 === */
+        .input-container {
+          padding: 1rem;
+          display: flex;
+          gap: 0.5rem;
+          background: rgba(0, 0, 0, 0.5);
+          border-top: 2px solid #0f0;
+        }
+        .input-box {
+          flex: 1;
+          background: rgba(0, 0, 0, 0.7);
+          border: 1px solid #0f0;
+          border-radius: 0;
+          padding: 0.8rem 1rem;
+          color: #0f0;
+          font-size: 1rem;
+          outline: none;
+          font-family: 'Courier New', monospace;
+        }
+        .input-box::placeholder {
+          color: #090;
+        }
+        .input-box:focus {
+          box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+          border-color: #0f0;
+        }
+        .send-btn {
+          background: #000;
+          color: #0f0;
+          border: 1px solid #0f0;
+          padding: 0 1.5rem;
+          cursor: pointer;
+          font-weight: bold;
+          text-transform: uppercase;
+          transition: all 0.2s;
+        }
+        .send-btn:hover {
+          background: #0f0;
+          color: #000;
+          box-shadow: 0 0 15px #0f0;
+        }
+
+        /* === 滚动条样式 === */
+        ::-webkit-scrollbar {
+          width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+          background: #0f0;
+          border: 2px solid #000;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: #0ff;
+        }
+
+
+    body{
+    background: url('9f1dd8523b81d68f37a0644b9d8e36cd.jpeg') no-repeat center center ;
+}
+
+    </style>
+</head>
+<body>
+<!-- 顶部状态栏 -->
+<div class="header">
+<!--    <img src="9f1dd8523b81d68f37a0644b9d8e36cd.jpeg" height="1024" width="1822"/>-->
+    <h1>UMBRELLA CORPORATION - AI BIO-AGENT</h1>
+    <div class="status">SECURITY LEVEL 5 | BIOSYSTEM ACTIVE</div>
+</div>
+
+<!-- 聊天区域 -->
+<div class="chat-container">
+    <div class="chat-box" id="chatBox">
+        <!-- AI初始问候 -->
+        <img src="9f1dd8523b81d68f37a0644b9d8e36cd.jpeg" height="1024" width="1822"/>
+        <div class="message agent-message">
+            <span class="agent-icon"></span>
+            <span id="greeting-text">连接建立。我是安布雷拉生物智能体。请提出您的问题，或者输入 "help" 获取指令列表。</span>
+        </div>
+        <!-- 加载动画容器 (默认隐藏) -->
+        <div class="message agent-message" id="loadingIndicator" style="display: none;">
+            <span class="agent-icon"></span>
+            <span class="loading">病毒扫描中</span>
+        </div>
+    </div>
+</div>
+
+<!-- 输入区域 -->
+<div class="input-container">
+    <input type="text" class="input-box" id="userInput" placeholder="输入指令...">
+    <button class="send-btn" id="sendBtn">发送</button>
+</div>
+
+<script>
+    const chatBox = document.getElementById('chatBox');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const greetingText = document.getElementById('greeting-text');
+
+    // 模拟AI回复数据库
+    const responses = [
+      "样本分析完成。数据匹配度 98.7%。结论如下...",
+      "正在检索深层生物数据库。警告：信息可能具有高危险性...",
+      "基因序列比对成功。建议立即采取隔离措施。",
+      "无法识别该病毒株。正在尝试建立新的突触连接...",
+      "权限验证通过。这是您请求的机密文件摘要。"
+    ];
+
+    function addMessage(message, isUser = false) {
+      // 隐藏加载状态
+      hideLoading();
+
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${isUser ? 'user-message' : 'agent-message'}`;
+
+      if (isUser) {
+        messageDiv.textContent = message;
+      } else {
+        // AI消息前添加病毒图标
+        messageDiv.innerHTML = `<span class="agent-icon"></span> ${message}`;
+      }
+
+      chatBox.appendChild(messageDiv);
+
+      // 自动滚动到底部
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function showLoading() {
+      loadingIndicator.style.display = 'block';
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function hideLoading() {
+      loadingIndicator.style.display = 'none';
+    }
+
+    function sendMessage() {
+      const message = userInput.value.trim();
+      if (message && !loadingIndicator.style.display === 'block') {
+        // 显示用户消息
+        addMessage(message, true);
+        userInput.value = '';
+
+        // 显示AI加载动画
+        showLoading();
+
+        // 模拟网络延迟/AI思考
+        setTimeout(() => {
+          // 隐藏加载动画
+          hideLoading();
+
+          // 生成随机回复
+          const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+          addMessage(randomResponse);
+        }, 2000 + Math.random() * 2000); // 随机延迟 2-4秒
+      }
+    }
+
+    // 事件监听
+    sendBtn.addEventListener('click', sendMessage);
+    userInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+</script>
+</body>
+</html>
+
+

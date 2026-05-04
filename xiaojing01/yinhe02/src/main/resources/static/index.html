@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-image: url('2.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        input { width: 100%; padding: 10px; margin: 10px 0; }
+        button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .message { margin-top: 20px; color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Login Demo12345</h2>
+        <form id="loginForm">
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <div id="message"></div>
+        <div id="protected" style="display:none;">
+            <h3>Protected Resource</h3>
+            <button id="accessBtn">Access Protected</button>
+            <div id="protectedMessage"></div>
+            <button id="logoutBtn" style="margin-top: 10px; background: #dc3545;">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const messageDiv = document.getElementById('message');
+        const protectedDiv = document.getElementById('protected');
+        const accessBtn = document.getElementById('accessBtn');
+        const protectedMessage = document.getElementById('protectedMessage');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+<!--        let token = localStorage.getItem('authToken');-->
+        let token = null
+
+        // On page load, if token exists, show protected section
+        if (token) {
+            protectedDiv.style.display = 'block';
+            messageDiv.className = 'success';
+            messageDiv.textContent = 'Welcome back! You are logged in.';
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    token = data.token;
+                    localStorage.setItem('authToken', token);
+                    messageDiv.className = 'success';
+                    messageDiv.textContent = data.message + ' Token: ' + token;
+                    protectedDiv.style.display = 'block';
+                } else {
+                    messageDiv.className = 'message';
+                    messageDiv.textContent = data.message;
+                    protectedDiv.style.display = 'none';
+                }
+            } catch (error) {
+                messageDiv.className = 'message';
+                messageDiv.textContent = 'Error: ' + error.message;
+            }
+        });
+
+        accessBtn.addEventListener('click', async () => {
+            if (!token) {
+                protectedMessage.className = 'message';
+                protectedMessage.textContent = 'No token available. Please login first.';
+                return;
+            }
+            try {
+                const response = await fetch('/auth/protected', {
+                    headers: { 'Authorization': token }
+                });
+
+                const text = await response.text();
+                if (response.ok) {
+                    protectedMessage.className = 'success';
+                    protectedMessage.textContent = text;
+                } else {
+                    protectedMessage.className = 'message';
+                    protectedMessage.textContent = text;
+                }
+            } catch (error) {
+                protectedMessage.className = 'message';
+                protectedMessage.textContent = 'Error: ' + error.message;
+            }
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('authToken');
+            token = null;
+            protectedDiv.style.display = 'none';
+            messageDiv.className = 'success';
+            messageDiv.textContent = 'You have been logged out.';
+        });
+    </script>
+</body>
+</html>

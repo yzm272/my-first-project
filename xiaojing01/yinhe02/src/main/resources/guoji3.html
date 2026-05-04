@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML 调用 Controller 示例 - jQuery</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<h1>AJAX 请求示例</h1>
+<button id="getDataButton">获取数据</button>
+<button id="postDataButton">提交数据</button>
+<div id="dataContainer"></div>
+
+<script>
+    $ (document).ready(function() {
+        $ ('#getDataButton').click(function() {
+            $ .ajax({
+               url: '/api/data',
+               type: 'GET',
+               success: function(data) {
+                    $ ('#dataContainer').text(JSON.stringify(data, null, 2));
+               },
+               error: function(xhr, status, error) {
+                   console.error('Error:', error);
+               }
+           });
+       });
+
+        $ ('#postDataButton').click(function() {
+           const dataToSend = { key: 'value' }; // 要发送的数据
+            $ .ajax({
+               url: '/api/submit-data',
+               type: 'POST',
+               contentType: 'application/json',
+               JSON.stringify(dataToSend),
+               success: function(data) {
+                    $ ('#dataContainer').text(JSON.stringify(data, null, 2));
+               },
+               error: function(xhr, status, error) {
+                   console.error('Error:', error);
+               }
+           });
+       });
+   });
+</script>
+</body>
+</html>

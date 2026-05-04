@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML 调用 Controller 示例</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<h1>获取数据示例</h1>
+<button id="fetchDataButton">智能问答</button>
+<div id="dataContainer">
+    <input type="text">
+</div>
+
+<script>
+    document.getElementById('fetchDataButton').addEventListener('click', function() {
+        fetch('/hello/streamchat')
+            .then(response => response.json())
+            .then(data => {
+                const dataContainer = document.getElementById('dataContainer');
+                dataContainer.innerHTML = JSON.stringify(data, null, 2);
+            })
+            .catch(error => console.error('Error:', error));
+    });
+</script>
+</body>
+</html>
